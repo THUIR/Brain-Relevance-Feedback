@@ -2,3 +2,5 @@ results/
 __pycache__/
 trash/
 release/
+/.ipynb_checkpoints
+*.ipynb
