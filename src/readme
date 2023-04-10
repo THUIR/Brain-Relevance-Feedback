@@ -1,0 +1,36 @@
+请注意，在改期刊版本时，需要把sigir没run的再跑一次
+part0_generate_eeg_score.py: generate idx2eeg_score
+
+part1_data_analyses.py: analyze eeg performance and paint images to report
+part1_online_glm.py: the general linear model (glm) analyses for online user study in UDR task->要不要重新生成online数据的模拟？毕竟改了一些参数->貌似是不用的，因为online数据其实是基于simulation的
+part1_online_pairwise.py the analyses for online user study in RDR task
+
+part2_topo_significance.py: paint topo graph representing the significance of each EEG channel
+
+part3_bert_functions.py, part3_bm25.py: base models for UDR and RDR
+
+part3_generate_all_rdr.py: RDR generate all results regarding all parameters
+part3_generate_all_udr.py: UDR generate all results regarding all parameters
+
+part3_generate_baseline_rdr.py: RDR generate baseline results (bert)
+part3_generate_baseline_udr.py: UDR generate baseline results (bert)
+
+part3_generate_udr_best_para.py: generate best parameters for UDR -> sigir没用 ideal adaptable parameter
+part3_generate_rdr_best_para.py: generate best parameters for RDR -> sigir没用 ideal adaptable parameter
+
+part3_paint_ideal_vs_fixed.py: generate ideal vs fixed png file -> sigir没用
+
+part3_search_fixed_parameter.py: tune the fixed parameter for UDR and RDR, respectively
+
+part3_udr.py: generate all results for UDR
+part3_rdr.py: generate all results for RDR
+
+part4_context_analyses.py: generate all performance table and prestent images regarding different search scenarios
+
+注：有一些统计数据的计算，代码在1215/src/part4_statistics.py下，没有同步
+
+part5_simulating_udr_quick.py 本来想尝试快一点的算法，基于统计学和概率分布直接确定参数，但发现文档的重排并不是连续的，所以用这种方案不一定合适。
+part5_udr.py udr模拟实验（尝试不同的文档聚类方法），应用在之前的用户上
+
+part6_predict_para.py 想着效果差的话，要不要加更多的feature来预测，但online实验已经做了啊…
+part6_udr.py udr模拟实验（尝试不同的文档聚类方法），应用在2的用户上(online 用户)
