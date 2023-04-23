@@ -18,7 +18,7 @@ def evaluate(eeg_performance, dis_select = '2'):
             y_true = eeg_performance[u]['serp_info'][0] + eeg_performance[u]['land_info'][0]
             metric['combined'].append(roc_auc_score(y_true, y_pred))
             metric['combined_cold_start'].append(roc_auc_score(y_true[:100], y_pred[:100]))
-            # 前40改成random
+
             y_pred = eeg_performance[u]['serp_info'][2] + eeg_performance[u]['land_info'][2]
             y_pred = [np.mean(y_pred) for i in range(40)] + y_pred[40:]
             metric['presonalized'].append(roc_auc_score(y_true, y_pred))

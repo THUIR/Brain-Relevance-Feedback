@@ -131,7 +131,7 @@ for u in user_list:
                 add_result(now_d_score, combine_array(future_score2, future_score1, args.alpha), u2result_list[u]['bqe(gd)'], prev_len = len(now_d_list))
             if 'bqe(bs)' in selected_runner:
                 future_score1 = [q2d2score[q][d]['score'] for d in now_d_list]
-                future_score2 = [(args.eeg_gamma) * d2score[d][0] for d in now_d_list]
+                future_score2 = [(args.eeg_gamma if args.eeg_gamma > 0 else 1) * d2score[d][0] for d in now_d_list]
                 add_result(now_d_score, combine_array(future_score2, future_score1, args.alpha), u2result_list[u]['bqe(bs)'], prev_len = len(now_d_list))
             if 'bqe(c)' in selected_runner:
                 future_score1 = [q2d2score[q][d]['score'] for d in now_d_list]

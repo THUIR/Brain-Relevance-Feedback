@@ -60,11 +60,11 @@ anno = json.load(open('../release/mode/anno.json'))
 
 q2subset2para = json.load(open('../results/para/udr.json'))
 
-idx2word = json.load(open('/home/yzy/resource/idx2word.json'))
+idx2word = json.load(open('../release/mode/idx2word.json'))
 
 def goon(u2info, u, u2result_list, device):
     if 'brm3(un)' in selected_runner or 'brm3(bs)' in selected_runner or 'brm3(bs+c-s)' in selected_runner:
-        ranker = BertForSequenceClassification.from_pretrained('/home/yzy/resource/swh-checkpoint-1500')
+        ranker = BertForSequenceClassification.from_pretrained('../resource/swh-checkpoint-1500')
         tokenizer = AutoTokenizer.from_pretrained('/home/yzy/resource/chinese_bert_wwm', use_fast=True)
         ranker.to(device)
         
@@ -261,8 +261,6 @@ def print_error(e):
 multi_thread = True
 if multi_thread:
     from multiprocessing.pool import Pool
-    # import torch
-    # torch.multiprocessing.set_start_method('spawn')
     pool = Pool(40)
     u2task = {}
     max_threads = 16

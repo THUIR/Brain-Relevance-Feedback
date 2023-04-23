@@ -4,7 +4,8 @@ import argparse
 import numpy as np
 from system.utils import add_result, combine_array, print_result2
 import random
-from part3_bm25 import rm3_paras, BM25, rm3_expansion, q_json, d_json
+from part3_bm25 import BM25, q_json, d_json
+from scipy import stats
 import torch
 torch.manual_seed(2021)
 torch.cuda.manual_seed_all(2021)
@@ -106,7 +107,7 @@ for u in user_list:
                     else:
                         now_d_score2.append(now_d_score2_dic[d])
                 except:
-                    # jiayudebug snippet start----------
+                    # debuging
                     inputs = ''
                     while inputs != 'continue':
                         try:
@@ -114,7 +115,6 @@ for u in user_list:
                         except Exception as e:
                             print(e)
                         inputs = input()
-                    # jiayudebug snippet end-------------
             if args.gd_evaluate:
                 now_d_score = [item - 1 for item in now_d_score2]
             if len(now_d_score) < 2 or np.std(now_d_score) == 0 or np.max(now_d_score) == 0:
@@ -131,16 +131,6 @@ for u in user_list:
                     else:
                         dic_para = para
             except:
-                # print(u, q, now_d_list)
-                # # jiayudebug snippet start----------
-                # inputs = ''
-                # while inputs != 'continue':
-                #     try:
-                #         print(eval(inputs))
-                #     except Exception as e:
-                #         print(e)
-                #     inputs = input()
-                # # jiayudebug snippet end-------------
                 dic_para = para
                 
             un_d2score = {}
@@ -209,8 +199,6 @@ for u in u2result_list.keys():
 for method in selected_runner:
     print_result2(method, result_list[method])
 
-
-from scipy import stats
 method2metric2auc_list = {}
 for u in list(u2result_list.keys()):
     for method in selected_runner:

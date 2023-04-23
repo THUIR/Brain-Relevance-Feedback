@@ -1,7 +1,7 @@
 import json
 from scipy import stats
 import numpy as np
-from part4_context_analyses_utils import udr_click, udr_length, rdr_click, rdr_bad_click, rdr_length
+from part5_context_analyses_utils import udr_click, udr_length, rdr_click, rdr_bad_click, rdr_length
 
 def performance_table(u2result_list):
     def print_result2(method, result_dic):
@@ -19,7 +19,6 @@ def performance_table(u2result_list):
                 for metric in u2result_list[u][method].keys():
                     if metric not in result_list[method].keys():
                         result_list[method][metric] = []
-                    # result_list[method][metric].append(np.mean(u2result_list[u][method][metric]))
                     result_list[method][metric] += (u2result_list[u][method][metric])
         for method in result_list.keys():
             if len(result_list[method]['ndcg@1']) == 0 or np.isnan(result_list[method]['ndcg@1'][0]):

@@ -242,7 +242,7 @@ def roberta_grouping(intent_list, anno, q, q2d2d2score, d_list, cluster_num = 5)
         kmeans = sklearn.cluster.KMeans(n_clusters = cluster_num, )
         y_kmeans2 = kmeans.fit_predict(vec_matrix)
     except:
-        # jiayudebug snippet start----------
+        # debugging----------
         inputs = ''
         while inputs != 'continue':
             try:
@@ -250,7 +250,6 @@ def roberta_grouping(intent_list, anno, q, q2d2d2score, d_list, cluster_num = 5)
             except Exception as e:
                 print(e)
             inputs = input()
-        # jiayudebug snippet end-------------
     j = 0
     for i in range(len(d_list)):
         if y_kmeans[i] != -1:
@@ -259,13 +258,12 @@ def roberta_grouping(intent_list, anno, q, q2d2d2score, d_list, cluster_num = 5)
     return y_kmeans
 
 def get_cos_similar(v1: list, v2: list):
-    num = float(np.dot(v1, v2))  # 向量点乘
-    denom = np.linalg.norm(v1) * np.linalg.norm(v2)  # 求模长的乘积
+    num = float(np.dot(v1, v2)) 
+    denom = np.linalg.norm(v1) * np.linalg.norm(v2)  
     return 0.5 + 0.5 * (num / denom) if denom != 0 else 0
 
 def roberta_grouping_soft(intent_list, anno, q, q2d2d2score, d_list, cluster_num = 5):
     global roberta
-    # 只去group那些有intent的
     y_kmeans = [0 for i in range((len(d_list)))]
     d2vec = {}
     for i, d in enumerate(d_list):
@@ -333,10 +331,6 @@ def lm_grouping(intent_list, anno, q, q2d2d2score, d_list, d_json, cluster_num =
     return y_kmeans
 
 if __name__ == '__main__':
-    # for q in q2d2d2score.keys():
-    #     d_list = list(q2d2d2score[q].keys())
-    #     grouping(q, q2d2d2score, d_list)
-    # save roberta
     parser = argparse.ArgumentParser()
     parser.add_argument('-grouping_method',type=str, help= 'the method that group documents w.r.t. their sub-topic', required=False, default = 'gd')
     parser.add_argument('-m',type=int, help= 'the length of bert split trunks', required=False, default = 20)

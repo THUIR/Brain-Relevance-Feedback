@@ -7,6 +7,7 @@ import random
 import copy
 import tqdm
 import sklearn.preprocessing
+from scipy import stats
 import torch
 from transformers import AutoTokenizer,BertForSequenceClassification
 from part3_bm25 import BM25, rm3_expansion, q_json, d_json, LM
@@ -59,10 +60,7 @@ general_mean = np.mean(list(u2mean_score.values()))
 general_std = np.mean(list(u2std_score.values()))
 
 anno = json.load(open('../release/mode/anno.json'))
-# anno = json.load(open('tmp_anno.json'))
 
-# q2subset2para = json.load(open('../results/para/udr.json'))
-# q2subset2para = json.load(open('../results/simulating/q2subset2para.exp_all.gd.json'))
 q2subset2para = json.load(open(f'../results/simulating/q2subset2click2para.{args.para}.json'))
 
 idx2word = json.load(open('/home/yzy/resource/idx2word.json'))
@@ -144,19 +142,8 @@ def goon(u2info, u, u2result_list, device):
                         else:
                             dic_para = para
                 except:
-                    # print('error')
-                    # # jiayudebug snippet start----------
-                    # inputs = ''
-                    # while inputs != 'continue':
-                    #     try:
-                    #         print(eval(inputs))
-                    #     except Exception as e:
-                    #         print(e)
-                    #     inputs = input()
-                    # # jiayudebug snippet end-------------
                     dic_para =  para
 
-            # use all parameters?
             un_d2score = {}
             for d in interactions.keys():
                 info_list = [0, 0]
@@ -302,8 +289,6 @@ def print_error(e):
 multi_thread = False
 if multi_thread:
     from multiprocessing.pool import Pool
-    # import torch
-    # torch.multiprocessing.set_start_method('spawn')
     pool = Pool(40)
     u2task = {}
     max_threads = 16
@@ -334,7 +319,7 @@ for u in list(u2result_list.keys()):
             try:
                 result_list[method][key] += (u2result_list[u][method][key])
             except:
-                # jiayudebug snippet start----------
+                # debugging----------
                 inputs = ''
                 while inputs != 'continue':
                     try:
@@ -342,12 +327,10 @@ for u in list(u2result_list.keys()):
                     except Exception as e:
                         print(e)
                     inputs = input()
-                # jiayudebug snippet end-------------
 
 for method in selected_runner:
     print_result2(method, result_list[method])
 
-from scipy import stats
 method2metric2auc_list = {}
 for u in list(u2result_list.keys()):
     for method in selected_runner:

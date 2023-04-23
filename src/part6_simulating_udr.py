@@ -50,7 +50,7 @@ def run_query(query_info, idx, simulator, result_dic, q2d2score, q2d2d2score, an
                         try:
                             now_d_score.append(anno[q][str(d)]['anno'][int(intent)])
                         except:
-                            # jiayudebug snippet start----------
+                            # debugging----------
                             inputs = ''
                             while inputs != 'continue':
                                 try:
@@ -58,7 +58,6 @@ def run_query(query_info, idx, simulator, result_dic, q2d2score, q2d2d2score, an
                                 except Exception as e:
                                     print(e)
                                 inputs = input()
-                            # jiayudebug snippet end-------------
                 all_d_score = now_d_score + future_d_score
                 all_d_score = [item for item in all_d_score if item != -1e-6]
                 scaler = MinMaxScaler()
@@ -233,7 +232,7 @@ if __name__ == '__main__':
         task_list = []
     else:
         result_list = []
-        for i in [1]: # tqdm.tqdm(range(len(true_data)))
+        for i in tqdm.tqdm(range(len(true_data))):
             result_list.append(run_query(true_data[i], i, simulator, result_dic, q2d2score, q2d2d2score, anno, args,))
 
     json.dump(result_list, open(f'../results/simulating/true_data_result_list.{args.mode}.{args.grouping_method}.json','w'))

@@ -3,6 +3,7 @@ import tqdm
 import numpy as np
 import pickle
 import pandas as pd
+from statsmodels.stats.anova import AnovaRM
 
 def load_data():
     u2info = json.load(open('../release/u2info.json'))
@@ -90,10 +91,7 @@ def process_data_merge():
             for channel in range(62):
                 selected_data = []
                 for i in range(len(u2rel2eeg[u][rel]['fs'])):
-                    # if np.max(u2rel2eeg[u][rel]['raw'][i][channel]) - np.min(u2rel2eeg[u][rel]['raw'][i][channel]) < 50e-6:
                     selected_data.append(i)
-                # for band in range(4):
-                #     tmp_dic['raw'][channel][band] = np.mean([u2rel2eeg[u][rel]['raw'][item][channel][select_bands[band][0]:select_bands[band][1]] for item in selected_data])
                 for band in range(5):
                     tmp_dic['fs'][channel][band]  = np.mean([u2rel2eeg[u][rel]['fs'][item][channel][band] for item in selected_data])
             u2rel2eeg[u][rel] = tmp_dic
@@ -101,7 +99,6 @@ def process_data_merge():
 
 
 def compute_f():
-    from statsmodels.stats.anova import anova_lm, AnovaRM
     u2rel2eeg = pickle.load(open('../release/u2rel2eeg.processed.merged.pkl', 'rb'))
 
     value = np.zeros((62, 5))
@@ -136,7 +133,7 @@ def paint_topo(rel_data, mask = None, name = ''):
 
     if mask == None:
         mask = np.ones(rel_data.shape)
-    # 把 mask 变成 60 的
+
     mask_new = []
     for i in range(len(picked_channels)):
         if picked_channels[i] in total_channels:

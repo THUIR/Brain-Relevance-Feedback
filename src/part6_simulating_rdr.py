@@ -2,13 +2,13 @@ import json
 import argparse
 import numpy as np
 import copy 
-from system.utils import bert_qm_all, add_result, combine_array, get_metric_sum
+from system.utils import combine_array
 import tqdm
 from sklearn.metrics import ndcg_score
 import random
 random.seed(2022)
 np.random.seed(2022)
-from part6_simulating_utils import Simulator, anno, q2d2score, true_data, q2doc_list, q2d2d2score, grouping, lm_grouping, roberta_grouping, get_true_data, roberta_grouping_soft
+from part6_simulating_utils import Simulator, anno, q2d2score, true_data, q2d2d2score, grouping, lm_grouping, roberta_grouping, get_true_data, roberta_grouping_soft
 import copy
 from multiprocessing.pool import Pool
 import os

@@ -2,7 +2,7 @@ import json
 import copy
 import argparse
 import numpy as np
-from system.utils import add_result, combine_array, print_result2, bert_qm_all
+from system.utils import add_result, combine_array
 import random
 import math
 import torch
@@ -58,69 +58,11 @@ general_mean = np.mean(list(u2mean_score.values()))
 general_std = np.mean(list(u2std_score.values()))
 
 anno = json.load(open('../release/mode/anno.json'))
-w2idf = json.load(open('../release/mode/word2idf.json'))
-q_json = json.load(open('../release/mode/qs2txt_idx.json'))
-d_json = json.load(open('../release/mode/q2d2txt_idx.json'))
-
-def BM25(q_dic, d_dic):
-    global rm3_paras, w2idf
-    doc_len = np.sum([item for item in d_dic.values()])
-    bm25_score = 0
-    for w in q_dic.keys():
-        if w in d_dic.keys():
-            sq = (rm3_paras['k3'] + 1) * q_dic[w] / (rm3_paras['k3'] + q_dic[w])
-            K = rm3_paras['k1'] * (1 - rm3_paras['b'] + rm3_paras['b'] * doc_len / rm3_paras['avg_doc_len'])
-            sd = (rm3_paras['k1'] + 1) * d_dic[w] / (K + d_dic[w])
-            bm25_score += sd * sq * w2idf[w]
-    return bm25_score
-
-def rm3_expansion(q, d_list, estimate_list):
-    global d_json, q_json, rm3_paras, w2idf
-    def add2dic(re_dic, w, v):
-        if w in re_dic.keys():
-            re_dic[w] += v
-        else:
-            re_dic[w] = v
-    # get add words with current docs
-    word2rel = {}
-    for j in range(0, len(d_list)):
-        pm = estimate_list[j]
-        doc_len = np.sum([item for item in d_json[q][d_list[j]].values()])
-        pq = 1
-        for w in q_json[str(q)].keys():
-            if w in d_json[str(q)][str(d_list[j])].keys():
-                pqi = rm3_paras['lambda'] * d_json[q][d_list[j]][w] / doc_len + (1 - rm3_paras['lambda']) / math.exp(w2idf[w])
-            else:
-                pqi = (1 - rm3_paras['lambda']) / math.exp(w2idf[w])
-            pq *= pqi
-        for w in d_json[q][d_list[j]].keys():
-            pwm = rm3_paras['lambda'] * d_json[q][d_list[j]][w] / doc_len + (1 - rm3_paras['lambda']) / math.exp(w2idf[w])            
-            add2dic(word2rel, w, pq * pm * pwm)
-    word2rel_sorted = sorted(word2rel.items(), key = lambda v: v[1], reverse = True)
-    new_q_p = copy.deepcopy(q_json[q])
-    current_count = 0
-    for w_ in word2rel_sorted:
-        w = w_[0]
-        if current_count == rm3_paras['add_count']:
-            break
-        if w not in new_q_p:
-            new_q_p[w] = 1
-            current_count += 1
-    return new_q_p
 
 para = [args.alpha, args.click_gamma, args.eeg_gamma]
 
 def detect_bad_click(d2score):
     num = 0
-    # re = []
-    # for d in d2score.keys():
-    #     if d2score[d][1] == 1:
-    #         re.append(d2score[d][3])
-    # if len(re) > 0:
-    #     mean_d2score = np.max(re)
-    #     num = len([item for item in re if item < mean_d2score])
-    # else:
-    #     num = 0
     for d in d2score.keys():
         if d2score[d][1] == 1 and d2score[d][3] <= 1:
             num += 1
@@ -129,7 +71,6 @@ def detect_bad_click(d2score):
 for u in user_list: 
     for raw_q in u2info[u]['raw_q2info'].keys():
         q = u2info[u]['raw_q2info'][raw_q]['q']
-        # 使用刺激文件中的doc_list
         doc_list = u2info[u]['raw_q2info'][raw_q]['doc_list']
         intent = u2info[u]['raw_q2info'][raw_q]['intent']
         raw_d = max([int(raw_d) for raw_d in u2info[u]['raw_q2task2info'][raw_q].keys()])
@@ -139,10 +80,8 @@ for u in user_list:
             for d in now_d_list:           
                 now_d_score.append(int(intent) in anno[q][d]['anno'])
             now_d_score2 = []
-            # use user annotation as gd
+            # use user annotation as ground truth
             interactions = u2info[u]['raw_q2task2info'][raw_q][raw_d]['interactions']
-            # if len(now_d_score) < 2 or np.std(now_d_score) == 0:
-            #     continue
             d2score = {}
             now_d_score2_dic = {}
             for d in interactions.keys():
@@ -175,7 +114,7 @@ for u in user_list:
                     else:
                         now_d_score2.append(now_d_score2_dic[d])
                 except:
-                    # jiayudebug snippet start----------
+                    # for debugging
                     inputs = ''
                     while inputs != 'continue':
                         try:
@@ -183,7 +122,6 @@ for u in user_list:
                         except Exception as e:
                             print(e)
                         inputs = input()
-                    # jiayudebug snippet end-------------
             if args.gd_evaluate:
                 now_d_score = [item - 1 for item in now_d_score2]
             if len(now_d_score) < 2 or np.std(now_d_score) == 0 or np.max(now_d_score) == 0:

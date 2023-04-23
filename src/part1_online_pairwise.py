@@ -1,5 +1,5 @@
 import json
-from statsmodels.stats.anova import anova_lm, AnovaRM
+from statsmodels.stats.anova import AnovaRM
 from statsmodels.stats.multicomp import MultiComparison
 import pandas as pd
 from scipy.stats import bartlett, ttest_rel
@@ -19,18 +19,7 @@ for u in sorted(u2info.keys()):
     if u.startswith('2_'):
         method2num = {r'BQE^{bs,c}':0, r'BQE^{c}':0, 'Equal':0}
         for raw_q in u2info[u]['raw_q2info'].keys():
-            try:
-                method2num[raw_method2method[u2info[u]['raw_q2info'][raw_q]['select']]] += 1
-            except:
-                # jiayudebug snippet start----------
-                inputs = ''
-                while inputs != 'continue':
-                    try:
-                        print(eval(inputs))
-                    except Exception as e:
-                        print(e)
-                    inputs = input()
-                # jiayudebug snippet end-------------
+            method2num[raw_method2method[u2info[u]['raw_q2info'][raw_q]['select']]] += 1
         u2treat2v[u] = method2num
         for i in range(len(method_list)):
             df.loc[len(df)] = [method_list[i], method2num[method_list[i]], u]
@@ -83,9 +72,6 @@ for u in u2treat2v.keys():
     data.append(list(u2treat2v[u].values()))
 data = np.array(data).T
 
-from aquarel import load_theme
-# https://huaban.com/pins/4476502099
-
 x, y1, y2 = [i for i in range(len(data[0]))], [data[0][i] for i in range(len(data[0]))], [-data[1][i] for i in range(len(data[0]))]
 
 def sorted_according_to(x1, x2):
@@ -105,7 +91,6 @@ plt.xlabel('Participant ID', fontsize = 20)
 plt.ylabel('Number', fontsize = 20)
 plt.legend(fontsize = 20)
 
-# https://color.adobe.com/zh/explore
 
 plt.savefig('../results/part1_online_pairwise_bar.jpg', bbox_inches = 'tight')
 
@@ -116,9 +101,6 @@ data = []
 for u in u2treat2v.keys():
     data.append(list(u2treat2v[u].values()))
 data = np.array(data).T
-
-from aquarel import load_theme
-# https://huaban.com/pins/4476502099
 
 x, y1, y2 = [i for i in range(len(data[0]))], [data[0][i] for i in range(len(data[0]))], [data[1][i] for i in range(len(data[0]))]
 
@@ -141,8 +123,6 @@ plt.xticks(x, [x_sorted[i]+1 for i in range(12)], fontsize = fontsize)
 plt.xlabel('Participant ID', fontsize = fontsize)
 plt.ylabel('Ratio', fontsize = fontsize)
 plt.legend(fontsize = fontsize)
-
-# https://color.adobe.com/zh/explore
 
 plt.savefig('../results/part1_online_pairwise_bar_normalized.jpg', bbox_inches = 'tight')
 

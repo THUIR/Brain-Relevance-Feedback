@@ -2,14 +2,12 @@ import json
 import copy
 import argparse
 import numpy as np
-from system.utils import add_result, combine_array, print_result2, bert_qm_all
+from system.utils import add_result
 import random
 import copy
 import tqdm
-import sklearn.preprocessing
 import torch
 from transformers import AutoTokenizer,BertForSequenceClassification
-from part3_bert_fucntions import calc_score
 np.random.seed(2021)
 torch.manual_seed(2021)
 torch.cuda.manual_seed_all(2021)
@@ -36,14 +34,9 @@ q2d2d2score = json.load(open(f'../release/mode/q2d2d2score.json'))
 
 result_dic = {'ndcg@1':[], 'ndcg@3':[], 'ndcg@5':[], 'ndcg@10':[], 'map':[]}
 result_list = {'bqe(bs+c)':copy.deepcopy(result_dic),'random':copy.deepcopy(result_dic),'bqe(bs)':copy.deepcopy(result_dic),'online':copy.deepcopy(result_dic),'bert':copy.deepcopy(result_dic), 'bqe(c)':copy.deepcopy(result_dic), 'bqe(un)':copy.deepcopy(result_dic), 'bm25':copy.deepcopy(result_dic),'rm3(un)':copy.deepcopy(result_dic),'rm3(bs)':copy.deepcopy(result_dic),'rm3(c)':copy.deepcopy(result_dic),'rm3(bs+c)':copy.deepcopy(result_dic),'sogou':copy.deepcopy(result_dic),'lm':copy.deepcopy(result_dic),'brm3(un)':copy.deepcopy(result_dic), 'brm3(bs)':copy.deepcopy(result_dic), 'brm3(bs+c)':copy.deepcopy(result_dic), 'brm3(c)':copy.deepcopy(result_dic), 'bqe(bs+c-s)':copy.deepcopy(result_dic),'bqe(bs-s)':copy.deepcopy(result_dic), 'bqe(c-s)':copy.deepcopy(result_dic),'bqe(un-s)':copy.deepcopy(result_dic),'brm3(bs+c-s)':copy.deepcopy(result_dic),'bqe(gd-s)':copy.deepcopy(result_dic),'bqe(gd)':copy.deepcopy(result_dic)}
-# selected_runner = ['bqe(bs+c)', 'bert', 'bqe(c)', 'bqe(bs)', 'bqe(un)', 'sogou', 'bqe(bs-s)', 'bqe(c-s)', 'bqe(un-s)', 'brm3(bs+c)', 'brm3(bs+c-s)', 'bqe(bs+c-s)'] 
+
 selected_runner = ['bqe(bs+c)', 'bert', 'bqe(c)', 'bqe(bs)', 'bqe(un)', 'sogou', 'bqe(bs-s)', 'bqe(c-s)', 'bqe(bs+c-s)'] 
-# selected_runner = ['bqe(bs+c-s)','bqe(gd)','bqe(gd-s)']
-# selected_runner = ['bm25', 'rm3(un)', 'rm3(bs)', 'rm3(c)', 'rm3(bs+c)', 'sogou']
-# selected_runner = list(result_list.keys())
-# selected_runner = ['bqe(bs+c)', 'random', 'sogou', 'bert', 'bqe(c)', 'bqe(bs)', 'bqe(un)', 'bqe(bs+c-s)', 'brm3(un)', 'brm3(bs)', 'brm3(bs+c)', 'brm3(c)', ]#,
-# selected_runner = ['lm','bert',]
-# selected_runner = ['brm3(un)', 'brm3(bs)', 'brm3(bs+c)', 'brm3(c)']
+
 u2result_list = {}
 for u in user_list:
     u2result_list[u] = {}
@@ -63,13 +56,7 @@ general_std = np.mean(list(u2std_score.values()))
 
 anno = json.load(open('../release/mode/anno.json'))
 
-# true_data = json.load(open('/home/yzy/online/github/satisfaction-user-study/random_data_tmp/raw_true_1025.json'))
-# q2doc_list = {}
-# for item in true_data:
-#     q2doc_list[item['q']] = [a['did'] for a in item['doc_list']]
 idx2word = json.load(open('/home/yzy/resource/idx2word.json'))
-
-from part3_bm25 import BM25, rm3_expansion, q_json, d_json, LM
 
 def goon(u2info, u, u2result_list, device):
     u2result_list[u]['0_0_0'] = copy.deepcopy(result_list)
@@ -137,8 +124,6 @@ def print_error(e):
 multi_thread = True
 if multi_thread:
     from multiprocessing.pool import Pool
-    # import torch
-    # torch.multiprocessing.set_start_method('spawn')
     pool = Pool(40)
     u2task = {}
     max_threads = 16

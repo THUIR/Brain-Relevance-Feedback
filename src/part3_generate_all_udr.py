@@ -2,14 +2,12 @@ import json
 import copy
 import argparse
 import numpy as np
-from system.utils import add_result, combine_array, print_result2, bert_qm_all
+from system.utils import add_result, combine_array, bert_qm_all
 import random
 import copy
 import tqdm
-import sklearn.preprocessing
 import torch
 from transformers import AutoTokenizer,BertForSequenceClassification
-from part3_bert_fucntions import calc_score
 np.random.seed(2021)
 torch.manual_seed(2021)
 torch.cuda.manual_seed_all(2021)
@@ -36,14 +34,9 @@ q2d2d2score = json.load(open(f'../release/mode/q2d2d2score.json'))
 
 result_dic = {'ndcg@1':[], 'ndcg@3':[], 'ndcg@5':[], 'ndcg@10':[], 'map':[]}
 result_list = {'bqe(bs+c)':copy.deepcopy(result_dic),'random':copy.deepcopy(result_dic),'bqe(bs)':copy.deepcopy(result_dic),'online':copy.deepcopy(result_dic),'bert':copy.deepcopy(result_dic), 'bqe(c)':copy.deepcopy(result_dic), 'bqe(un)':copy.deepcopy(result_dic), 'bm25':copy.deepcopy(result_dic),'rm3(un)':copy.deepcopy(result_dic),'rm3(bs)':copy.deepcopy(result_dic),'rm3(c)':copy.deepcopy(result_dic),'rm3(bs+c)':copy.deepcopy(result_dic),'sogou':copy.deepcopy(result_dic),'lm':copy.deepcopy(result_dic),'brm3(un)':copy.deepcopy(result_dic), 'brm3(bs)':copy.deepcopy(result_dic), 'brm3(bs+c)':copy.deepcopy(result_dic), 'brm3(c)':copy.deepcopy(result_dic), 'bqe(bs+c-s)':copy.deepcopy(result_dic),'bqe(bs-s)':copy.deepcopy(result_dic), 'bqe(c-s)':copy.deepcopy(result_dic),'bqe(un-s)':copy.deepcopy(result_dic),'brm3(bs+c-s)':copy.deepcopy(result_dic),'bqe(gd-s)':copy.deepcopy(result_dic),'bqe(gd)':copy.deepcopy(result_dic)}
-# selected_runner = ['bqe(bs+c)', 'bert', 'bqe(c)', 'bqe(bs)', 'bqe(un)', 'sogou', 'bqe(bs-s)', 'bqe(c-s)', 'bqe(un-s)', 'brm3(bs+c)', 'brm3(bs+c-s)', 'bqe(bs+c-s)'] 
+# please selected runners indicating what models do you want to run, where bqe(a+b) indicates query expansion using signals a, b, and pseudo-relevance signals, -s indicates using fixed parameter 
 selected_runner = ['bqe(bs+c)', 'bert', 'bqe(c)', 'bqe(bs)', 'bqe(un)', 'sogou', 'bqe(bs-s)', 'bqe(c-s)', 'bqe(bs+c-s)'] 
-# selected_runner = ['bqe(bs+c-s)','bqe(gd)','bqe(gd-s)']
-# selected_runner = ['bm25', 'rm3(un)', 'rm3(bs)', 'rm3(c)', 'rm3(bs+c)', 'sogou']
-# selected_runner = list(result_list.keys())
-# selected_runner = ['bqe(bs+c)', 'random', 'sogou', 'bert', 'bqe(c)', 'bqe(bs)', 'bqe(un)', 'bqe(bs+c-s)', 'brm3(un)', 'brm3(bs)', 'brm3(bs+c)', 'brm3(c)', ]#,
-# selected_runner = ['lm','bert',]
-# selected_runner = ['brm3(un)', 'brm3(bs)', 'brm3(bs+c)', 'brm3(c)']
+
 u2result_list = {}
 for u in user_list:
     u2result_list[u] = {}
@@ -63,24 +56,17 @@ general_std = np.mean(list(u2std_score.values()))
 
 anno = json.load(open('../release/mode/anno.json'))
 
-# true_data = json.load(open('/home/yzy/online/github/satisfaction-user-study/random_data_tmp/raw_true_1025.json'))
-# q2doc_list = {}
-# for item in true_data:
-#     q2doc_list[item['q']] = [a['did'] for a in item['doc_list']]
-idx2word = json.load(open('/home/yzy/resource/idx2word.json'))
-
-from part3_bm25 import BM25, rm3_expansion, q_json, d_json, LM
+idx2word = json.load(open('../release/mode/idx2word.json'))
 
 def goon(u2info, u, u2result_list, device):
     if 'brm3(un)' in selected_runner or 'brm3(bs)' in selected_runner or 'brm3(bs+c)' in selected_runner:
-        ranker = BertForSequenceClassification.from_pretrained('/home/yzy/resource/swh-checkpoint-1500')
-        tokenizer = AutoTokenizer.from_pretrained('/home/yzy/resource/chinese_bert_wwm', use_fast=True)
+        ranker = BertForSequenceClassification.from_pretrained('../resource/swh-checkpoint-1500')
+        tokenizer = AutoTokenizer.from_pretrained('../resource/chinese_bert_wwm', use_fast=True)
         ranker.to(device)
         
     for raw_q in tqdm.tqdm(u2info[u]['raw_q2info'].keys()):
         q = u2info[u]['raw_q2info'][raw_q]['q']
         doc_list = u2info[u]['raw_q2info'][raw_q]['doc_list']
-        # doc_list = q2doc_list[q]
         for raw_d in u2info[u]['raw_q2task2info'][raw_q].keys():
             future_d_score = []
             future_d_list = []
@@ -117,7 +103,7 @@ def goon(u2info, u, u2result_list, device):
             for d in now_d_score2_dic.keys():
                 now_d_score2_dic[d] = [(now_d_score2_dic[d] - 1)/3, (now_d_score2_dic[d] - 1)/3]
 
-            # use all parameters?
+            # use all parameters
             un_d2score = {}
             for d in interactions.keys():
                 info_list = [0, 0]

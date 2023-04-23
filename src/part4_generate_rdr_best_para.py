@@ -2,7 +2,7 @@ import json
 import copy
 import argparse
 import numpy as np
-from system.utils import add_result, combine_array, print_result2, bert_qm_all
+from system.utils import add_result, combine_array
 import random
 import math
 import torch
@@ -35,7 +35,7 @@ q2d2d2score = json.load(open(f'../release/mode/q2d2d2score.json'))
 result_dic = {'ndcg@1':[],'ndcg@3':[],'ndcg@5':[], 'ndcg@10':[], 'map':[]}
 result_list = {'bqe(bs)':copy.deepcopy(result_dic),'random':copy.deepcopy(result_dic),'online':copy.deepcopy(result_dic),'bert':copy.deepcopy(result_dic),'bqe(c)':copy.deepcopy(result_dic),'bqe(bs+c)':copy.deepcopy(result_dic),'bqe(un)':copy.deepcopy(result_dic),'bm25':copy.deepcopy(result_dic),'rm3(un)':copy.deepcopy(result_dic),'rm3(bs)':copy.deepcopy(result_dic),'rm3(c)':copy.deepcopy(result_dic),'rm3(bs+c)':copy.deepcopy(result_dic),'sogou':copy.deepcopy(result_dic),'bqe(bs+c-s)':copy.deepcopy(result_dic),'bqe(bs-s)':copy.deepcopy(result_dic), 'bqe(c-s)':copy.deepcopy(result_dic), 'bqe(un-s)': copy.deepcopy(result_dic)}
 selected_runner = list(result_list.keys()) 
-# selected_runner = ['bm25', 'rm3(un)', 'rm3(bs)', 'rm3(bs+c)', 'rm3(c)']
+
 selected_runner = ['bqe(bs+c)',]
 
 u2result_list = {}

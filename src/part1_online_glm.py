@@ -12,19 +12,7 @@ for u in u2info.keys():
             if 'method_list' not in u2info[u]['raw_q2info'][raw_q].keys():
                 continue
             method_list = u2info[u]['raw_q2info'][raw_q]['method_list']
-            # 最后一个raw_d实际上是用户没有接触的，所以不考虑
             raw_d_list = [int(item) for item in list(u2info[u]['raw_q2task2info'][raw_q].keys())]
-
-            if len(method_list) != len(raw_d_list) - 1:
-                # jiayudebug snippet start----------
-                inputs = ''
-                while inputs != 'continue':
-                    try:
-                        print(eval(inputs))
-                    except Exception as e:
-                        print(e)
-                    inputs = input()
-                # jiayudebug snippet end-------------
                     
             intent = u2info[u]['raw_q2info'][raw_q]['intent']
             q = u2info[u]['raw_q2info'][raw_q]['q']

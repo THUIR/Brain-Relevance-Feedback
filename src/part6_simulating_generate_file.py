@@ -150,7 +150,7 @@ def bug_true_data(task, mode):
     for i in range(len(true_data_list)):
         q = true_data_list[i]['q']
         i2subset[i] = true_data_list[i]['subset']
-        # I don't know the intent, choose average best performance
+        # we can not access user's search intent, choose average best performance
         for intent in true_data_result_list[i].keys():
             for subset in true_data_result_list[i][intent].keys():
                 for para in true_data_result_list[i][intent][subset].keys():    

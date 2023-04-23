@@ -9,7 +9,6 @@ import tqdm
 import sklearn.preprocessing
 import torch
 from transformers import AutoTokenizer, BertForSequenceClassification
-from part3_bert_fucntions import calc_score
 np.random.seed(2021)
 torch.manual_seed(2021)
 torch.cuda.manual_seed_all(2021)
@@ -37,17 +36,12 @@ q2d2d2score = json.load(open(f'../release/mode/q2d2d2score.json'))
 
 result_dic = {'ndcg@1':[], 'ndcg@3':[], 'ndcg@5':[], 'map':[], 'ndcg@10':[]}
 result_list = {'bqe(bs+c)':copy.deepcopy(result_dic),'random':copy.deepcopy(result_dic),'bqe(bs)':copy.deepcopy(result_dic),'online':copy.deepcopy(result_dic),'bert':copy.deepcopy(result_dic), 'bqe(c)':copy.deepcopy(result_dic), 'bqe(un)':copy.deepcopy(result_dic), 'bm25':copy.deepcopy(result_dic),'rm3(un)':copy.deepcopy(result_dic),'rm3(bs)':copy.deepcopy(result_dic),'rm3(c)':copy.deepcopy(result_dic),'rm3(bs+c)':copy.deepcopy(result_dic),'sogou':copy.deepcopy(result_dic),'lm':copy.deepcopy(result_dic),'brm3(un)':copy.deepcopy(result_dic), 'brm3(bs)':copy.deepcopy(result_dic), 'brm3(bs+c)':copy.deepcopy(result_dic), 'brm3(c)':copy.deepcopy(result_dic), 'bqe(bs+c-s)':copy.deepcopy(result_dic),}
-# selected_runner = ['bqe(bs+c)', 'random', 'online', 'bert', 'bqe(c)', 'bqe(bs)', 'bqe(un)']
-# selected_runner = ['bm25', 'rm3(un)', 'rm3(bs)', 'rm3(c)', 'rm3(bs+c)', 'sogou']
-# selected_runner = list(result_list.keys())
+
 selected_runner = ['bqe(bs+c)',]#,
-# selected_runner = ['lm','bert',]
-# selected_runner = ['brm3(un)', 'brm3(bs)', 'brm3(bs+c)', 'brm3(c)']
+
 u2result_list = {}
 for u in user_list:
     u2result_list[u] = {}
-# for u in user_list:
-#     u2result_list[u] = copy.deepcopy(result_list)
 
 u2idx2score = {}
 for u in user_list:
@@ -64,8 +58,8 @@ general_std = np.mean(list(u2std_score.values()))
 
 anno = json.load(open('../release/mode/anno.json'))
 
-true_data = json.load(open('/home/yzy/online/github/satisfaction-user-study/random_data_tmp/raw_true_1025.json'))
-idx2word = json.load(open('/home/yzy/resource/idx2word.json'))
+true_data = json.load(open('../release/user_study_simulation_example.json'))
+idx2word = json.load(open('../release/mode/idx2word.json'))
 q2doc_list = {}
 for item in true_data:
     q2doc_list[item['q']] = [a['did'] for a in item['doc_list']]
@@ -74,8 +68,8 @@ from part3_bm25 import BM25, rm3_expansion, q_json, d_json, LM
 
 def goon(u2info, u, u2result_list, device):
     if 'brm3(un)' in selected_runner or 'brm3(bs)' in selected_runner or 'brm3(bs+c)' in selected_runner:
-        ranker = BertForSequenceClassification.from_pretrained('/home/yzy/resource/swh-checkpoint-1500')
-        tokenizer = AutoTokenizer.from_pretrained('/home/yzy/resource/chinese_bert_wwm', use_fast=True)
+        ranker = BertForSequenceClassification.from_pretrained('../resource/swh-checkpoint-1500')
+        tokenizer = AutoTokenizer.from_pretrained('../resource/chinese_bert_wwm', use_fast=True)
         ranker.to(device)
     for raw_q in tqdm.tqdm(u2info[u]['raw_q2info'].keys()):
         q = u2info[u]['raw_q2info'][raw_q]['q']
