@@ -1,14 +1,15 @@
 These are the datasets and implementation for the paper:
+The lateest code is available at https://github.com/THUIR/Brain-Relevance-Feedback.
 
 ***Relevance Feedback with Brain Signals. Ziyi Ye, Xiaohui Xie, Qingyao Ai, Yiqun Liu, Zhihong Wang, and Min Zhang, 2023.*** submitted to ACM TOIS.
 
-For further information on the proposed relevance feedback method, please refer to the paper. 
+For further information on the proposed relevance feedback method and experimental results, please refer to the paper. 
 
 If you have any problem about this work or dataset, please contact with Ziyi Ye at Yeziyi1998@gmail.com or Yiqun Liu at yiqunliu@tsinghua.edu.cn. We are very willing to help you with the usage of our public data and code and we really hope the related communities (i.e., BMI for search) can attract more attentions.
 
 ## Dataset
-Please download the user study dataset from ***ww*** and unzip it as "release/".
-The dataset description can be find at "release/readme".
+Please download the user study dataset from https://cloud.tsinghua.edu.cn/d/afe41a6a30bb4a4bbca2/ and save it as "release/".
+The dataset description can be find at "release/readme.md".
 
 ## Source Codes
 All implementation codes are available in the "src" directory.
