@@ -1,0 +1,52 @@
+{%extends "query/base.html" %}
+
+{% block extra_css %}
+<style>
+    .my-button {
+        width: 100%;
+        background-color: rgb(133, 235, 137);
+        border: 1px solid rgb(133, 235, 137);
+        border-radius: 5px;
+        color: rgb(12, 2, 2);
+        padding: 8px 10px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 8px;
+        cursor: pointer;
+    }
+    body {
+        margin: 0;
+        font-size: 100%;
+        background-color: #000000;
+    }
+</style>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+</script>
+{% endblock %}
+
+{% block main_body %}
+
+<div class="container mt-2">
+    <h3 style="text-align: center; color: white">休息</h3>
+
+    <div class="container" style="display: inline;" id="img-pair">
+        <form name="question" action="{% url 'query:questions' question_id doc_id user_name user_id %}"
+               method="post">
+        {% csrf_token %}
+
+        <input type="hidden" name="grade" id="grade">
+            <div class="row justify-content-around">
+                <div class="col-2">
+                    <input type="hidden" class="my-button" value = "10"  name="grade" id="grade-btn1"/>
+                    <input type="submit" class="my-button" value = "继续"  name="grade1" id="grade-btn2" />
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

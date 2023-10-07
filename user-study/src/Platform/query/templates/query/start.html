@@ -1,0 +1,95 @@
+{%extends "query/base.html" %}
+
+{% block extra_css %}
+<style>
+    .my-button {
+        width: 200px;
+        background-color: rgb(133, 235, 137);
+        border-radius: 5px;
+        color: black;
+        padding: 8px 10px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-weight:bold;
+        font-size: 20px;
+        margin: 8px;
+        cursor: pointer;
+    }
+    body {
+        margin: 0;
+        font-size: 100%;
+        background-color: #000000;
+    }
+</style>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+    function set_grade(){
+        var grade = document.getElementById("grade");
+        grade.value = "手气不错";
+    }
+    function validateForm(){
+        if(rel==-1){
+            alert("请选择搜索意图！");
+            return false;
+        }
+        return true;
+    }
+
+    var rel = -1;
+    function set_doc_score(v){
+        if(rel != -1){;
+            document.getElementById("intent-" + rel).style.border = "black";
+            document.getElementById("intent-" + rel).style.backgroundColor = "white";
+        }
+        rel = v;
+        document.getElementById("intent-" + rel).style.backgroundColor = "yellow";
+        document.getElementById("intent-" + rel).style.border = "4px solid rgb(155, 100, 100)";
+        var grade = document.getElementById("rel");
+        grade.value = rel;
+
+        text = document.getElementById("text");
+        text.innerHTML = document.getElementById("intent-" + rel).innerHTML;
+        text.style.display = 'true';
+        console.log("go in");
+    }
+
+</script>
+
+{% endblock %}
+
+{% block main_body %}
+<div class="container mt-2" style="color: white;">
+    <h3 style="text-align: center; font-size: 45px;" >查询{{ question_id }}:{{ query }}</h3>
+    <h3 style="text-align: center; font-size: 45px;">请进行搜索意图选择</h3>
+
+    <div class="container mt-2" style="color: white; font-size: 30px; text-align: center; ">
+        <div class="row" id="result_list" style="margin-left: 15%;">
+            {% for item in intent %} 
+            <div class="my-button" onclick="set_doc_score({{forloop.counter}})" id="intent-{{forloop.counter}}" style = "background-color: white; width: 100%; height: 10%; margin-left:-5%; font-size: 18px; margin-bottom: 2%;">{{item}}</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <form name="question" action="{% url 'query:questions' question_id doc_id user_name user_id %}"
+            method="post" onsubmit="return validateForm();" >
+        {% csrf_token %}
+        <input type="hidden" name="grade" id="grade" value = '首屏展示'>
+        <input type="hidden" name="rel" id="rel" value = '-1'>
+        <div class="row justify-content-center mt-1">
+            <div class="col-2">
+                <b>
+                <input type="submit" value="搜索结果" class="my-button" style = "position: fixed; left: 40%; display: inline;"/>
+                <input type="submit" value="手气不错" class="my-button" style = "position: fixed; right: 40%; display: inline; background-color: rgb(155,100,100);" onclick="set_grade()"/>
+                </b>
+            </div>
+        </div>
+    </form>
+
+    <h3 style="text-align: center; font-size: 45px; position: fixed; margin: auto 0; top:50%;" id = "text"></h3>
+    <!-- <div class="my-button" id="text" style = "background-color: white; width: 100%; font-size: 18px; display:none;"></div> -->
+
+</div>
+{% endblock %}

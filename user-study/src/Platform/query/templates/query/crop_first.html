@@ -1,0 +1,214 @@
+{%extends "query/base.html" %}
+{% load static %}
+{% block extra_css %}
+<style>
+    .little-button {
+        background-color: rgb(162, 236, 165);
+        border: 1px solid rgb(162, 236, 165);
+        border-radius: 5px;
+        color: black;
+        padding: 1px 1px;
+        text-align: center;
+        text-decoration: none;
+        margin-top: 6px;
+        cursor: pointer;
+        font-weight:bold;
+        margin-right: 20px;
+        width: 45px; 
+        height: 30px; 
+        font-size: 18px;
+    }
+    .my-button {
+        width: 200px;
+        background-color: rgb(133, 235, 137);
+        border: 1px solid rgb(133, 235, 137);
+        border-radius: 5px;
+        color: black;
+        padding: 8px 10px;
+        font-weight:bold;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 20px;
+        margin: 8px;
+        cursor: pointer;
+    }
+    body {
+        margin: 0;
+        font-size: 100%;
+        background-color: #000000;
+    }
+    .image1 {
+        width: 800px;
+        height: 800px;
+        left: 50%;
+        margin-left: -400px;
+        margin-top: 100px;
+        position: absolute;
+    }
+    
+    .image1 img {
+        width: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+</style>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+    var goon = true;
+    function check_form_data(did=-1){
+    if(did != -1){
+        var doc_id = document.getElementById("doc_id");
+        doc_id.value = did;
+    }
+    if(goon){
+        goon = false;
+        return true;
+    }
+    return false;
+    }
+
+    // var grade_color = ["",
+    //     "rgb(133, 228, 235)",
+    //     "rgb(145, 232, 200)",
+    //     "rgb(162, 236, 165)",
+    //     "rgb(180, 235, 145)",
+    //     "rgb(199, 235, 133)",
+    // ]
+    // var doc_score_dic = 0;
+    // function set_doc_score(rel){
+    //     if(doc_score_dic != 0){
+    //         document.getElementById("grade-btn" + doc_score_dic).style.backgroundColor = grade_color[rel];
+    //         document.getElementById("grade-btn" + doc_score_dic).style.color = "black";
+    //     }
+    //     doc_score_dic = rel;
+        
+    //     document.getElementById("grade-btn" + rel).style.backgroundColor = "rgb(5, 95, 8)";
+    //     document.getElementById("grade-btn" + doc_score_dic).style.color = "white";
+    // }
+
+    var show_abandon = {{ show_abandon | safe }};
+    var show_history = {{ show_history | safe }};
+    var show_cross = {{ show_cross | safe }};
+    var img_list = {{img_list|safe}};
+    if(show_abandon == 0){
+        var btn2 = document.getElementById("grade-btn2");
+        btn2.style = "display: None;";
+    }
+
+    var time_out = 2000;
+    if(show_history == 0){
+        var results = document.getElementById("result_list");
+        results.style = "display: None;";
+    }else{
+        time_out = 0;
+    }
+
+    var time_cross = 500;
+
+    if (show_cross == 1) {
+        setTimeout(function(){
+                var image_click = document.getElementById('img_text');
+                image_click.style.display = "none";
+            }, time_cross);
+        for (let index = 0; index < img_list.length; index++){
+            setTimeout(function(){
+                var image_click = document.getElementById('img_click');
+                var tmp_src = img_list[index];
+                image_click.src = "/static/" + tmp_src;
+            }, time_out * index + time_cross);
+        }
+        setTimeout(function(){
+            var form = document.getElementById('choice');
+            form.style = "visibility: visible";
+            var img_click = document.getElementById('img_click');
+            img_click.disabled  ="";
+            img_click.style = "width: 100%; border: 10px solid rgb(133, 235, 137); top: 50%; left: 50%; position: absolute; transform: translate(-50%, -50%);";
+        },time_out * img_list.length + time_cross);
+    }else{
+        var image_click = document.getElementById('img_text');
+        image_click.style.display = "none";
+        var form = document.getElementById('choice');
+        form.style = "visibility: visible";
+
+        var img_click = document.getElementById('img_click');
+        img_click.disabled  ="";
+        img_click.style = "width: 100%; border: 3px solid rgb(133, 235, 137); top: 50%; left: 50%; position: absolute; transform: translate(-50%, -50%);";
+    }
+    
+   
+    
+</script>
+{% endblock %}
+
+
+{% block main_body %}
+
+
+<div class="container mt-2" style="color: white; ">
+    <h3 style="text-align: center; font-size: 45px;" >查询{{ question_id }}:</h3>
+    <h3 style="text-align: center; font-size: 45px;" > {{ query }}</h3>
+
+    <div class="container"  id="img-pair">
+
+        <div class="row justify-content-center image1" id = 'imf' style="display: inline;">
+            <form name="question" action="{% url 'query:questions' question_id doc_id user_name user_id %}"
+            method="post" style="" id = "choice2" onsubmit="return check_form_data()">
+            <input type = "hidden" name = "grade" id = "grade"  value="进入结果页" style = "display: none;">
+            {%csrf_token%}
+            {% for item in img_list %} 
+                {% load static %}
+                <input type = "image" style="width: 100%; top: 50%; left: 50%; position: absolute; transform: translate(-50%, -50%);" id = "img_click" disabled="disabled" value = ""/>
+            {% endfor %}
+            <input type = "text" style="width: 100%; top: 50%; left: 50%; position: absolute; transform: translate(-50%, -50%); font-size: 40px; font-weight: bolder; text-align: center;" id = "img_text" value="首屏展示"/>
+        </form>
+        </div>
+
+        <!-- <div class="row justify-content-around"  style = "position: absolute; top: 20%; left: 50%; transform: translate(-50%, -50%) ">
+            <h1 id='anno' style="visibility: hidden;">相关性标注：</h1>
+            <div class="little-button" onclick="set_doc_score(1)" id="grade-btn1" style="visibility: hidden;">1</div>
+            <div class="little-button" onclick="set_doc_score(2)" id="grade-btn2" style="visibility: hidden;">2</div>
+            <div class="little-button" onclick="set_doc_score(3)" id="grade-btn3" style="visibility: hidden;">3</div>
+            <div class="little-button" onclick="set_doc_score(4)" id="grade-btn4" style = "visibility: hidden;">4</div>
+        </div> -->
+
+        <form name = "question" action = "{% url 'query:questions' question_id doc_id user_name user_id %}"
+               method = "post" style = "visibility: hidden; " id = "choice" onsubmit = "return check_form_data()">
+        {% csrf_token %}
+        <input type = "hidden" name = "grade" id = "grade" >
+            <div class = "row justify-content-around">
+                <div class = "col-2" style="">
+                    <input type="submit" class="my-button" value="下一个结果"  name="grade"  id="grade-btn2" style="background-color: white; bottom:10%; position: fixed; left: 40%; display: inline;" />
+                    <input type = "submit" class = "my-button" value="结束搜索" name="grade" id="grade-btn1" style="background-color: white; bottom:10%; position: fixed; right: 40%;  display: inline;"/>
+                    <input type="submit" class="my-button" value="查看历史"  name="grade"  id="grade-btn4" style = "background-color: rgb(239, 192, 126); left: 80%; top: 5%; position: fixed;"/>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
+<div class="container mt-2" style="color: white; font-size: 30px; margin-left: 73%; "> 
+    <form name="question" action="{% url 'query:questions' question_id doc_id user_name user_id %}"
+    method="post" style="" id = "choice2">
+    <input type = "hidden" name = "grade" id = "grade"  value="进入结果页">
+    <input type = "hidden" name = "doc_id" id = "doc_id"  value="0">
+    {%csrf_token%}
+    <div class="row tm-albums-container" id="result_list" style = "">
+        {% for item in img_list %} 
+            <figure class="effect-sadie image" style="width: 100%; ">
+                {% load static %}
+                <input type = "image" style=" display: block; " src="{% static item %}"  value="{{forloop.counter0}}"  onclick="return check_form_data({{forloop.counter0}})">
+                <br>
+            </figure>
+        {% endfor %}
+    </div>
+</form>
+</div>
+{% endblock %}

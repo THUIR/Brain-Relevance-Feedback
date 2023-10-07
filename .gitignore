@@ -4,3 +4,7 @@ trash/
 release/
 /.ipynb_checkpoints
 *.ipynb
+user-study/src/Platform/query/static/query/merged_data/
+user-study/merged_data/
+*.png
+*.mp3

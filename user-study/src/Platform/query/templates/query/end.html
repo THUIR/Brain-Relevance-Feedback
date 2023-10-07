@@ -1,0 +1,330 @@
+{%extends "query/base.html" %}
+
+{% block extra_css %}
+<style>
+    .my-button {
+        width: 100%;
+        background-color: rgb(162, 236, 165);
+        border: 1px solid rgb(162, 236, 165);
+        border-radius: 5px;
+        color: black;
+        padding: 8px 10px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        font-weight:bold;
+        margin: 8px;
+        cursor: pointer;
+        font-weight:bold;
+    }
+    .my-button-hidden {
+        width: 100%;
+        background-color: rgb(162, 236, 165);
+        border: 1px solid rgb(162, 236, 165);
+        border-radius: 5px;
+        color: black;
+        padding: 8px 10px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 8px;
+        cursor: pointer;
+        display: none;
+        font-weight:bold;
+    }
+    .little-button {
+        width: 80%;
+        background-color: rgb(162, 236, 165);
+        border-radius: 5px;
+        color: black;
+        padding: 1px 1px;
+        text-align: center;
+        text-decoration: none;
+        font-size: 12px;
+        margin-top: 6px;
+        cursor: pointer;
+        font-weight:bold;
+    }
+    .tm-albums-container {
+        margin: 50px auto;
+        max-width: 2500px;
+    }
+
+    .tm-album-col {
+        display: flex;
+    }
+
+    body {
+        margin: 0;
+        font-size: 100%;
+        background-color: #000000;
+    }
+</style>
+{% endblock %}
+
+{% block extra_script %}
+
+<script src="/static/bootstrap/js/jquery.cookie.js"></script>
+<script src="/static/bootstrap/js/recorder.mp3.min.js"></script>
+
+<script>
+
+    var grade_color = ["",
+        "rgb(133, 228, 235)",
+        "rgb(145, 232, 200)",
+        "rgb(162, 236, 165)",
+        "rgb(180, 235, 145)",
+        "rgb(199, 235, 133)",
+    ]
+
+    var rec;
+    /**调用open打开录音请求好录音权限**/
+    var recOpen=function(success){//一般在显示出录音按钮或相关的录音界面时进行此方法调用，后面用户点击开始录音时就能畅通无阻了
+        rec=Recorder({
+            type:"mp3",sampleRate:16000,bitRate:16 //mp3格式，指定采样率hz、比特率kbps，其他参数使用默认配置；注意：是数字的参数必须提供数字，不要用字符串；需要使用的type类型，需提前把格式支持文件加载进来，比如使用wav格式需要提前加载wav.js编码引擎
+            ,onProcess:function(buffers,powerLevel,bufferDuration,bufferSampleRate,newBufferIdx,asyncEnd){
+                //录音实时回调，大约1秒调用12次本回调
+                //可利用extensions/waveview.js扩展实时绘制波形
+                //可利用extensions/sonic.js扩展实时变速变调，此扩展计算量巨大，onProcess需要返回true开启异步模式
+            }
+        });
+
+        //var dialog=createDelayDialog(); 我们可以选择性的弹一个对话框：为了防止移动端浏览器存在第三种情况：用户忽略，并且（或者国产系统UC系）浏览器没有任何回调，此处demo省略了弹窗的代码
+        rec.open(function(){//打开麦克风授权获得相关资源
+            //dialog&&dialog.Cancel(); 如果开启了弹框，此处需要取消
+            //rec.start() 此处可以立即开始录音，但不建议这样编写，因为open是一个延迟漫长的操作，通过两次用户操作来分别调用open和start是推荐的最佳流程
+            
+            success&&success();
+        },function(msg,isUserNotAllow){//用户拒绝未授权或不支持
+            //dialog&&dialog.Cancel(); 如果开启了弹框，此处需要取消
+            console.log((isUserNotAllow?"UserNotAllow，":"")+"无法录音:"+msg);
+        });
+    };
+
+    /**开始录音**/
+    function recStart(){//打开了录音后才能进行start、stop调用
+        rec.start();
+    };
+
+    /**结束录音**/
+    function recStop(){
+        rec.stop(function(blob,duration){
+            console.log(blob,(window.URL||webkitURL).createObjectURL(blob),"时长:"+duration+"ms");
+            
+            rec.close();//释放录音资源，当然可以不释放，后面可以连续调用start；但不释放时系统或浏览器会一直提示在录音，最佳操作是录完就close掉
+            rec=null;
+            
+            //已经拿到blob文件对象想干嘛就干嘛：立即播放、上传
+
+            /*** 【实现上传】 ***/
+            var form=new FormData();
+            var qid = {{question_id|safe}};
+            var uid = {{user_id|safe}};
+            form.append("upfile", blob, uid+"_"+qid); //和普通form表单并无二致，后端接收到upfile参数的文件，文件名为recorder.mp3
+            //...其他表单参数
+            $.ajax({
+                url:'/query/save_audio/' //上传接口地址
+                ,type:"POST"
+                ,contentType:false //让xhr自动处理Content-Type header，multipart/form-data需要生成随机的boundary
+                ,processData:false //不要处理data，让xhr自动处理
+                ,data:form
+                ,headers: {
+                "X-CSRFToken": $.cookie('csrftoken')  // Django 403处理
+                }
+                ,success:function(v){
+                    console.log("上传成功",v);
+                }
+                ,error:function(s){
+                    console.error("上传失败",s);
+                }
+            });
+        },function(msg){
+            console.log("录音失败:"+msg);
+            rec.close();//可以通过stop方法的第3个参数来自动调用close
+            rec=null;
+        });
+    };
+
+    var recorded = false;
+    function record(){
+        var bt = document.getElementById("record-button")
+        if(bt.value == "开始录制"){
+            recOpen(function(){
+                recStart();
+            });
+            bt.value = "结束录制"
+        }else{
+            setTimeout(function() {
+                alert("录制成功！");
+                bt.value = "开始录制";
+                recorded = true;
+            }, Math.floor(Math.random()*400) + 100);
+            recStop();
+        }
+    }
+    doc_score_dic = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0, 13: 0, 14: 0, 15: 0, 16: 0, 17: 0, 18: 0, 19: 0, 20: 0, 21: 0, 22: 0, 23: 0, 24: 0, 25: 0, 26: 0, 27: 0, 28: 0, 29: 0, 30: 0, 31: 0, 32: 
+        0, 33: 0, 34: 0, 35: 0, 36: 0, 37: 0, 38: 0, 39: 0, 40: 0, 41: 0, 42: 0, 43: 0, 44: 0, 45: 0, 46: 0, 47: 0, 48: 0, 49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0, 58: 0, 59: 0, 60: 0, 61: 0, 62: 0, 63: 0, 64: 0, 65: 0, 66: 0, 67: 0, 
+        68: 0, 69: 0, 'total': 0, 'answer': "",'diff': 0};
+    function no_answer(){
+        doc_score_dic['answer'] = "None";
+        var bt = document.getElementById("no-answer-button")
+        if(bt.style.backgroundColor == "white"){
+            recorded = true;
+            bt.style.backgroundColor = "yellow";
+        }else{
+            bt.style.backgroundColor = "white";
+        }
+    }
+
+    function set_doc_score(did, rel){
+        if(doc_score_dic[did] != 0){
+            document.getElementById("grade-btn" + doc_score_dic[did] + '-' + did).style.backgroundColor = grade_color[rel];
+            document.getElementById("grade-btn" + doc_score_dic[did] + '-' + did).style.color = "black";
+            document.getElementById("grade-btn" + doc_score_dic[did] + '-' + did).style.border = "black";
+            if(did == 'total' ||  did == 'answer' || did == 'diff'){
+
+            }else{
+                document.getElementById("grade-btn" + doc_score_dic[did] + '-' + did).style.width = "50px";
+                document.getElementById("grade-btn" + doc_score_dic[did] + '-' + did).style.height = "30px";
+            }
+            
+        }
+        doc_score_dic[did] = rel;
+        
+        document.getElementById("grade-btn" + rel + '-' + did).style.backgroundColor = "rgb(5, 95, 8)";
+        document.getElementById("grade-btn" + doc_score_dic[did] + '-' + did).style.color = "white";
+        document.getElementById("grade-btn" + doc_score_dic[did] + '-' + did).style.border = "4px solid rgb(155, 100, 100)";
+        if(did == 'total' ||  did == 'answer' || did == 'diff'){
+
+        }else{
+            document.getElementById("grade-btn" + doc_score_dic[did] + '-' + did).style.width = "54px";
+            document.getElementById("grade-btn" + doc_score_dic[did] + '-' + did).style.height = "34px";
+        }
+        
+
+    }
+    
+    function validateForm() {
+        var img_list = {{img_list|safe}};
+        for (var i=0;i<img_list.length;i++){ 
+            if(doc_score_dic[i] == 0){
+                alert("请完成所有问题！");
+                return false;
+            }
+        }
+        if(doc_score_dic['total'] == 0){
+            alert("请完成所有问题！");
+            return false;
+        }
+        var ans = document.getElementById("user-answer").value;
+        if (!recorded && (ans == "" || ans == null)) {
+            alert("请录制问题的答案！");
+            return false;
+        }
+        if(doc_score_dic['answer'] != 'None'){
+            doc_score_dic['answer'] = ans;
+        }
+        document.getElementById("grade-btn-end").value = JSON.stringify(doc_score_dic);
+        return true;
+    }
+
+</script>
+{% endblock %}
+
+{% block main_body %}
+
+
+<h3 style="text-align: center; font-size: 45px; color: white" >查询{{ question_id }}:</h3>
+<h3 style="text-align: center; font-size: 45px; color: white" > {{ query }}</h3>
+
+<div class="row justify-content-center" id="annt-btn" style="color: white; font-size: 18px;">
+    请录制问题的答案或说明解决问题需要怎样利用查询结果：
+        <input type = "button" class="my-button" onclick="record()" value = "开始录制" id = "record-button" style="background-color: white; display: inline; height: 35px; width: 300px; margin-top: -0.2%;"/>
+        <input type = "button" class="my-button" onclick="no_answer()" value = "没搜索到相关文档请点这里" id = "no-answer-button" style="background-color: white; display: inline; height: 35px; width: 210px; margin-top: -0.2%;"/>
+</div>
+<!-- <div class="row justify-content-center" id="annt-btn" style="color: white; font-size: 18px; margin-bottom: 80px;"> -->
+    <!-- 或在文本框中回答问题： -->
+    <input type="hidden" id="user-answer" placeholder="请输入问题的答案" style="display: none; height: 35px; width: 600px;" value = "">
+<!-- </div> -->
+
+<div class="container mt-2" style="color: white; font-size: 30px; text-align: center; ">
+    搜索结果相关性标注：
+    <div class="row" id="result_list" style="margin-left: 15%;">
+        {% for item in img_list %} 
+            <figure class="effect-sadie image" style="margin:60px">
+                {% load static %}
+                <img style="width: 110%;" src="{% static item %}" style="display: inline;"/>
+                <div class="row justify-content-around" style="width: 110%;">
+                    <div class="col-2 align-self-center">
+                        <div class="little-button" onclick="set_doc_score({{forloop.counter0}}, 1)" id="grade-btn1-{{forloop.counter0}}" style="background-color: rgb(133, 228, 235); width: 50px; height: 30px; font-size: 18px;">1</div>
+                    </div>
+                    <div class="col-2 align-self-center">
+                        <div class="little-button" onclick="set_doc_score({{forloop.counter0}}, 2)" id="grade-btn2-{{forloop.counter0}}" style="background-color: rgb(145, 232, 200); width: 50px; height: 30px; font-size: 18px;">2</div>
+                    </div>
+                    <div class="col-2 align-self-center">
+                        <div class="little-button" onclick="set_doc_score({{forloop.counter0}}, 3)" id="grade-btn3-{{forloop.counter0}}" style="background-color: rgb(180, 235, 145); width: 50px; height: 30px; font-size: 18px;">3</div>
+                    </div>
+                    <div class="col-2 align-self-center">
+                        <div class="little-button" onclick="set_doc_score({{forloop.counter0}}, 4)" id="grade-btn4-{{forloop.counter0}}" style = "background-color: rgb(199, 235, 133); width: 50px; height: 30px; font-size: 18px;">4</div>
+                    </div>
+                </div>
+            </figure>
+        {% endfor %}
+    </div>
+</div>
+<div class="container mt-2" >
+    <div class="container" style="display: inline;" id="img-pair">
+        <form name="question" action="{% url 'query:questions' question_id doc_id user_name user_id %}"
+        onsubmit="return validateForm();" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="grade" id="grade">
+                <h3 style="text-align: center; color: white; ">问题难度标注：</h3>
+                <div class="row justify-content-around" style="margin-bottom: 60px;">
+                    <div class="col-2 align-self-center">
+                        <div class="my-button" onclick="set_doc_score('diff',1)" id="grade-btn1-diff" style="background-color: rgb(133, 228, 235);">非常困难</div>
+                    </div>
+                    <div class="col-2 align-self-center">
+                        <div class="my-button" onclick="set_doc_score('diff',2)" id="grade-btn2-diff" style="background-color: rgb(145, 232, 200);">困难</div>
+                    </div>
+                    <div class="col-2 align-self-center">
+                        <div class="my-button" onclick="set_doc_score('diff',3)" id="grade-btn3-diff" >一般</div>
+                    </div>
+                    <div class="col-2 align-self-center">
+                        <div class="my-button" onclick="set_doc_score('diff',4)" id="grade-btn4-diff" style = "background-color: rgb(180, 235, 145);">简单</div>
+                    </div>
+                    <div class="col-2 align-self-center">
+                        <div class="my-button" onclick="set_doc_score('diff',5)" id="grade-btn5-diff" style = "background-color: rgb(199, 235, 133);">非常简单</div>
+                    </div>
+                </div>
+                <h3 style="text-align: center; color: white">搜索满意度标注：</h3>
+                <div class="row justify-content-around">
+                    <div class="col-2 align-self-center">
+                        <div class="my-button" onclick="set_doc_score('total',1)" id="grade-btn1-total" style="background-color: rgb(133, 228, 235);">非常不满意</div>
+                    </div>
+                    <div class="col-2 align-self-center">
+                        <div class="my-button" onclick="set_doc_score('total',2)" id="grade-btn2-total" style="background-color: rgb(145, 232, 200);">不满意</div>
+                    </div>
+                    <div class="col-2 align-self-center">
+                        <div class="my-button" onclick="set_doc_score('total',3)" id="grade-btn3-total" >一般</div>
+                    </div>
+                    <div class="col-2 align-self-center">
+                        <div class="my-button" onclick="set_doc_score('total',4)" id="grade-btn4-total" style = "background-color: rgb(180, 235, 145);">满意</div>
+                    </div>
+                    <div class="col-2 align-self-center">
+                        <div class="my-button" onclick="set_doc_score('total',5)" id="grade-btn5-total" style = "background-color: rgb(199, 235, 133);">非常满意</div>
+                    </div>
+                </div>
+                <div class="col-2" style = "margin:0 auto; margin-top: 50px;">
+                    <input type="hidden" class="my-button" value = ""  name="endinfo" id="grade-btn-end"/>
+                    <input type="hidden" class="my-button" value = "9"  name="grade" id="grade-btn1"/>
+                    <input type="submit" class="my-button" value = "下一页"  name="grade1" id="grade-btn2" style="background-color:white; display: inline-block; text-align: center;"/>
+                </div>
+        </form>
+    </div>
+</div>
+
+<h3 style="text-align: center; color: white; ">累了的话，可以在这个页面休息一下哦~</h3>
+
+{% endblock %}

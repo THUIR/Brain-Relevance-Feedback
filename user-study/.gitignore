@@ -1,0 +1,5 @@
+src/Platform/query/static/query/merged_data/
+merged_data/
+.DS_Store
+*.png
+*.mp3

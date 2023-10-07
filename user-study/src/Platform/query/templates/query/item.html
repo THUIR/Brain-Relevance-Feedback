@@ -1,0 +1,98 @@
+{%extends "query/base.html" %}
+
+{% block extra_css %}
+<style>
+    .my-button {
+        width: 100%;
+        background-color: rgb(133, 235, 137);
+        border: 1px solid rgb(133, 235, 137);
+        border-radius: 5px;
+        color: black;
+        padding: 8px 10px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 20px;
+        font-weight:bold;
+        margin: 8px;
+        cursor: pointer;
+    }
+    body {
+        margin: 0;
+        font-size: 100%;
+        background-color: #000000;
+    }
+    .image {
+        width: 800px;
+        height: 800px;
+        left: 50%;
+        margin-left: -400px;
+        margin-top: 50px;
+        margin-bottom: 100px;
+        position: absolute;
+    }
+    .image img {
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block extra_script %}
+<script>
+    setTimeout(() => {
+        document.getElementById("return").style.visibility = "visible";
+    }, 0);
+    ans = {{ans | safe}};
+    if(ans == 13){
+        var grade = document.getElementById("grade-btn1");
+        grade.value = "12";
+    }
+</script>
+{% endblock %}
+
+{% block main_body %}
+<center>
+<div style="position: relative;">
+{% load static %}
+<!-- <iframe src="{% static landing_page %}" frameBorder="0" scrolling="yes" style="width: 1440px; height:900px; left: 50%; right: 50%; top: 50%; bottom: 50%; margin-top: 270px;"></iframe> -->
+<iframe src="{% static landing_page %}" frameBorder="0" scrolling="yes" style="width: 1440px; height:900px; position: fixed; left: 0; right: 0; top: 0; bottom: 0; margin: auto; background-color: white;"></iframe>
+
+</div>
+</center>
+<div class = "col" float="left" style = 'position: fixed; bottom: 0px; z-index: 1;'>
+    <form name="question" action="{% url 'query:questions' question_id doc_id user_name user_id %}"
+    method="post" style="visibility: hidden;" id="return">
+{% csrf_token %}
+ <div class="row justify-content-around">
+     <div class="col-2">
+         <input type="hidden" class="my-button" value = "8"  name="grade" id="grade-btn1"/>
+         <input type="submit" class="my-button" value = "返回"  name="grade1" id="grade-btn2" style="background-color: white;"/>
+     </div>
+ </div>
+</form>
+</div>
+
+<!-- <div class="container mt-2" style="color: white;">
+    <h3 style="text-align: center; font-size: 45px;" >查询{{ question_id }}:</h3>
+    <h3 style="text-align: center; font-size: 45px;" > {{ query }}</h3>
+
+    <div class="container" id="img-pair">
+        <form name="question" action="{% url 'query:questions' question_id doc_id user_name user_id %}"
+               method="post" style="visibility: hidden;" id="return">
+        {% csrf_token %}
+
+        <input type="hidden" name="grade" id="grade">
+            <div class="row justify-content-around">
+                <div class="col-2">
+                    <input type="hidden" class="my-button" value = "8"  name="grade" id="grade-btn1"/>
+                    <input type="submit" class="my-button" value = "返回"  name="grade1" id="grade-btn2" />
+                </div>
+            </div>
+        </form>
+
+        <div class="row justify-content-center image">
+        </div>
+    </div>
+</div> -->
+
+{% endblock %}

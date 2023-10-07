@@ -67,3 +67,11 @@ Before running the codes, please check these issues: (1) install all requirement
 | part6_simulating_rdr.py | Search and generate the best combination parameters with synthetic signals in RRF task. Note that the combination parameter is generated for each possible search context. |
 | part6_udr.py | Run the IRF experiment, similar to "part3_udr.py", but with adaptive signals combination. |
 | part6_rdr.py | Run the RRF experiment, similar to "part3_rdr.py", but with adaptive signals combination. |
+
+
+## User Study System
+To run the user study system, please download the user study dataset from https://cloud.tsinghua.edu.cn/d/afe41a6a30bb4a4bbca2 and run "python manage.py runserver" at the path of ""Brain-Relevance-Feedback/user-study/src/Platform".
+
+## Contaction
+Please feel free to contact the author at yeziyi1998@gmail.com for any help.
+

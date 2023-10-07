@@ -1,0 +1,9 @@
+**/images/**
+**/*.jpg
+**/*.png
+**/__pycache__/**
+**/.DS_Store
+**/results/**
+**/.vscode/**
+**/test_data*
+db.sqlite3

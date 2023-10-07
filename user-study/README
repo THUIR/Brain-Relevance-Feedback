@@ -1,0 +1,17 @@
+mobile_data:数据
+    crop：单个结果截图
+    landing_page：内容页截图
+    screen_shot：整体serp截图
+src：代码
+    data_preprocess/data_preprocess.py 生成ui可用的数据
+    psychopy_ui: 出发文件 main.py 使用指令 python3 main.py uid
+random_data: 随机化每个用户的刺激序列
+user_data: 实验记录的用户行为数据
+
+# todo
+src/Platform内为基于django的项目
+1. 录音模块，要求用户说出答案
+2. 页面美化，每个crop居中，从landing page返回的crop可以不显示白色十字，直接返回crop和按键，在浏览器全屏模式下测试
+3. 页面美化，landing page图片加长加宽
+3. 每15/20个问题增加一些休息界面
+4. 标注页面的美化
